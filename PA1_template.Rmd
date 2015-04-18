@@ -38,6 +38,8 @@ For this part of the assignment, you can ignore the missing values in the datase
     
 ```{r average steps per day}
 
+options(scipen=999)
+
   daily_tbl <- aggregate(act$steps,list(date=act$date),sum)
 
   hist(daily_tbl$x)
@@ -90,11 +92,38 @@ __- rows with missing values = `r missing_values`  __
 require(plyr)
 require(Hmisc)
 
+# ... this imputation method uses "impute" function to replace the NAs with the mean value 
+# ... within each of the "5-minute intervals", creates a new data frame "act_nonas" that has the
+# ... added column "imputed.steps"
+
   act_nonas <- ddply(act, "interval", mutate, imputed.steps = impute(steps, mean))
 
 # ... look at some rows to verfy what we have created
 
   head (act_nonas, 10)
+
+# ... make a plot just to see the difference between raw data and data set with
+# ... the imputed values
+
+  par(mfrow=c(2,1))
+
+  plt.legend.lbls = c("Raw data set")
+	plot (act_nonas$steps~act_nonas$date, type="n",
+		ylim=c(0,1000),
+		ylab = "Steps",
+		xlab = "")
+	points (act_nonas$steps~act_nonas$date, col = "blue")
+	legend('topright', plt.legend.lbls , lty=1, col=c('blue'), bty='y', cex=.75)
+
+  plt.legend.lbls = c("NAs imputed to mean(interval)")
+  plot (act_nonas$steps~act_nonas$date, type="n",
+		ylim=c(0,1000),
+		ylab = "Steps",
+		xlab = "")
+	points (act_nonas$imputed.steps~act_nonas$date, col = "black")
+	legend('topright', plt.legend.lbls , lty=1, col=c('black'), bty='y', cex=.75)
+
+  par(mfrow=c(1,1))
 
 ```
 

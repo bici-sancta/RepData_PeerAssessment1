@@ -27,6 +27,8 @@ For this part of the assignment, you can ignore the missing values in the datase
     
 
 ```r
+options(scipen=999)
+
   daily_tbl <- aggregate(act$steps,list(date=act$date),sum)
 
   hist(daily_tbl$x)
@@ -39,8 +41,8 @@ For this part of the assignment, you can ignore the missing values in the datase
   daily_mean <- mean(daily_tbl$x, na.rm = TRUE)
 ```
 
-  __Median steps / day = 1.0765 &times; 10<sup>4</sup> __  
-  __Mean steps / day   = 1.0766189 &times; 10<sup>4</sup> __   
+  __Median steps / day = 10765 __  
+  __Mean steps / day   = 10766.1886792 __   
 
 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-  
 __What is the average daily activity pattern ?__  
@@ -87,6 +89,10 @@ __- rows with missing values = 2304  __
 require(plyr)
 require(Hmisc)
 
+# ... this imputation method uses "impute" function to replace the NAs with the mean value 
+# ... within each of the "5-minute intervals", creates a new data frame "act_nonas" that has the
+# ... added column "imputed.steps"
+
   act_nonas <- ddply(act, "interval", mutate, imputed.steps = impute(steps, mean))
 
 # ... look at some rows to verfy what we have created
@@ -108,6 +114,35 @@ require(Hmisc)
 ## 10    34 2012-10-10        0     34.000000
 ```
 
+```r
+# ... make a plot just to see the difference between raw data and data set with
+# ... the imputed values
+
+  par(mfrow=c(2,1))
+
+  plt.legend.lbls = c("Raw data set")
+	plot (act_nonas$steps~act_nonas$date, type="n",
+		ylim=c(0,1000),
+		ylab = "Steps",
+		xlab = "")
+	points (act_nonas$steps~act_nonas$date, col = "blue")
+	legend('topright', plt.legend.lbls , lty=1, col=c('blue'), bty='y', cex=.75)
+
+  plt.legend.lbls = c("NAs imputed to mean(interval)")
+  plot (act_nonas$steps~act_nonas$date, type="n",
+		ylim=c(0,1000),
+		ylab = "Steps",
+		xlab = "")
+	points (act_nonas$imputed.steps~act_nonas$date, col = "black")
+	legend('topright', plt.legend.lbls , lty=1, col=c('black'), bty='y', cex=.75)
+```
+
+![plot of chunk assisted imputing](figure/assisted imputing-1.png) 
+
+```r
+  par(mfrow=c(1,1))
+```
+
 4. Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day.  
 
 
@@ -125,8 +160,8 @@ require(Hmisc)
   daily_mean2 <- mean(daily_tbl2$x, na.rm = TRUE)
 ```
 
-  __Median steps / day (with imputation) = 1.0766189 &times; 10<sup>4</sup> __  
-  __Mean steps / day (with imputation)  = 1.0766189 &times; 10<sup>4</sup> __   
+  __Median steps / day (with imputation) = 10766.1886792 __  
+  __Mean steps / day (with imputation)  = 10766.1886792 __   
 
 - Do these values differ from the estimates from the first part of the assignment?  
 __--> Median and Mean are now equal__  
